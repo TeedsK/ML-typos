@@ -1,0 +1,9 @@
+Flask==2.3.2
+flask-cors==4.0.0
+transformers==4.35.2
+torch==2.7.0
+python-dotenv==1.0.0
+sentencepiece
+# Note: Specific versions are for reproducibility.
+# 'torch' version might depend on your system's CUDA capabilities if you want GPU support.
+# This setup assumes CPU or automatic GPU detection by PyTorch.
