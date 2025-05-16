@@ -1,9 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
+pandas
+datasets
+scikit-learn
+evaluate
 Flask==2.3.2
 flask-cors==4.0.0
 transformers==4.35.2
-torch==2.7.0
+torch==2.5.1+cu121
 python-dotenv==1.0.0
 sentencepiece
-# Note: Specific versions are for reproducibility.
-# 'torch' version might depend on your system's CUDA capabilities if you want GPU support.
-# This setup assumes CPU or automatic GPU detection by PyTorch.

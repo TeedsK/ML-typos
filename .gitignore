@@ -1,0 +1,43 @@
+# Node.js / React / Vite
+node_modules/
+dist/
+build/
+.vite/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.egg
+*.env
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# VS Code
+.vscode/
+.history/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.swp
+*.swo
+.idea/
+*.bak
+*.tmp

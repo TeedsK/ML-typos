@@ -15,7 +15,7 @@ import evaluate # Hugging Face Evaluate library
 import torch
 
 # --- Configuration ---
-DATASET_PATH = "./developer_typo_dataset_v4_95k.csv"  # Your main dataset
+DATASET_PATH = "./developer_typo_dataset_60k.csv"  # Your main dataset
 PRETRAINED_MODEL_NAME = "t5-small" # Starting point
 OUTPUT_DIR = "./t5_typo_corrector_v1" # Where the fine-tuned model will be saved
 LOG_FILE = os.path.join(OUTPUT_DIR, "training_log.txt")
@@ -31,8 +31,8 @@ TASK_PREFIX = "fix typos: "
 # Model training parameters
 LEARNING_RATE = 5e-5 # 2e-5 to 5e-5 is common for fine-tuning transformers
 NUM_TRAIN_EPOCHS = 3 # Start with 3, can increase if needed (more epochs = longer training)
-PER_DEVICE_TRAIN_BATCH_SIZE = 8 # Adjust based on your GPU memory (4, 8, 16 are common)
-PER_DEVICE_EVAL_BATCH_SIZE = 8  # Adjust based on your GPU memory
+PER_DEVICE_TRAIN_BATCH_SIZE = 32 # Adjust based on your GPU memory (4, 8, 16 are common)
+PER_DEVICE_EVAL_BATCH_SIZE = 32  # Adjust based on your GPU memory
 WEIGHT_DECAY = 0.01
 LOGGING_STEPS = 100 # Log training loss every N steps
 EVAL_STEPS = 500    # Evaluate on validation set every N steps (can be same as logging_steps)
@@ -141,16 +141,16 @@ def main():
     # 6. Define Training Arguments
     logger.info("Defining training arguments...")
     training_args = Seq2SeqTrainingArguments(
-        output_dir=OUTPUT_DIR,
+         output_dir=OUTPUT_DIR,
         
-        eval_strategy="steps",  # <<< TRY RE-ADDING THIS
-        eval_steps=COMMON_STEP_INTERVAL, # Or EVAL_STEPS if COMMON_STEP_INTERVAL isn't defined
+        evaluation_strategy="steps",  # <<< RE-ADD THIS
+        eval_steps=EVAL_STEPS,        # Ensure EVAL_STEPS is a positive integer
         
-        logging_strategy="steps",     # <<< TRY RE-ADDING THIS (aligns with logging_steps)
+        logging_strategy="steps",     # <<< RE-ADD THIS
         logging_steps=LOGGING_STEPS,   
         
-        save_strategy="steps",          # <<< TRY RE-ADDING THIS
-        save_steps=COMMON_STEP_INTERVAL, # Or SAVE_STEPS
+        save_strategy="steps",          # <<< RE-ADD THIS
+        save_steps=SAVE_STEPS,         
         
         learning_rate=LEARNING_RATE,
         per_device_train_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
@@ -159,11 +159,12 @@ def main():
         save_total_limit=SAVE_TOTAL_LIMIT,
         num_train_epochs=NUM_TRAIN_EPOCHS,
         predict_with_generate=True, 
-        fp16=torch.cuda.is_available(), 
+        fp16=torch.cuda.is_available(), # This will be True now you have CUDA
         load_best_model_at_end=True, 
         metric_for_best_model="eval_loss", 
         greater_is_better=False,
-        # do_eval=True # This is usually implied if evaluation_strategy="steps"
+        # do_eval=True # Not strictly needed if evaluation_strategy is "steps"
+                      # but doesn't hurt to keep if you had it.
     )
 
     # 7. (Optional) Compute Metrics function for evaluation
