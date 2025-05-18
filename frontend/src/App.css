@@ -40,3 +40,8 @@
 .read-the-docs {
   color: #888;
 }
+
+/* App.css additions */
+.token-table { width:100%; border-collapse:collapse; margin-top:1rem; }
+.token-table th, .token-table td { border:1px solid #ddd; padding:4px 8px; }
+.token-table th { background:#f0f0f0; }

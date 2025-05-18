@@ -1,137 +1,110 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css'; // Assuming you might add specific styles here if needed
+import './App.css';
 
-const BACKEND_URL = 'http://localhost:5001/api/check_typos'; // Backend API URL
+const BACKEND_URL = 'http://localhost:5001/api/check_typos'; // Flask URL
+const TOP_K = 3;                                            // how many probs to show
 
 function App() {
-  const [inputText, setInputText] = useState('');
-  const [originalText, setOriginalText] = useState('');
-  const [correctedText, setCorrectedText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [metadata, setMetadata] = useState(null); // For model name, processing time etc.
+  const [inputText,      setInputText]      = useState('');
+  const [originalText,   setOriginalText]   = useState('');
+  const [correctedText,  setCorrectedText]  = useState('');
+  const [tokenDetails,   setTokenDetails]   = useState([]);  // NEW
+  const [metadata,       setMetadata]       = useState(null);
+  const [isLoading,      setIsLoading]      = useState(false);
+  const [error,          setError]          = useState('');
 
-  useEffect(() => {
-    console.log('[App.jsx] Component mounted.');
-    // You could add an initial health check to the backend here if desired
-    // checkBackendHealth();
-    return () => {
-      console.log('[App.jsx] Component unmounted.');
-    };
-  }, []);
+  const handleInputChange = (e) => setInputText(e.target.value);
 
-  // Example of a health check function (optional)
-  // const checkBackendHealth = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:5001/api/health');
-  //     console.log('[App.jsx checkBackendHealth] Backend health:', response.data);
-  //   } catch (err) {
-  //     console.error('[App.jsx checkBackendHealth] Backend health check failed:', err);
-  //     setError('Failed to connect to the backend. Ensure it is running.');
-  //   }
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) { setError('Please enter text.'); return; }
 
-  const handleInputChange = (event) => {
-    console.debug('[App.jsx handleInputChange] New input value:', event.target.value);
-    setInputText(event.target.value);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    console.info('[App.jsx handleSubmit] Submitting sentence:', inputText);
-    if (!inputText.trim()) {
-      console.warn('[App.jsx handleSubmit] Input text is empty. Aborting submission.');
-      setError('Please enter some text to check.');
-      setOriginalText('');
-      setCorrectedText('');
-      setMetadata(null);
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-    setOriginalText(''); // Clear previous results
-    setCorrectedText('');
-    setMetadata(null);
-
+    setIsLoading(true); setError('');
     try {
-      console.debug('[App.jsx handleSubmit] Sending POST request to:', BACKEND_URL);
-      const response = await axios.post(BACKEND_URL, { sentence: inputText });
-      console.info('[App.jsx handleSubmit] Response received:', response);
-
-      if (response.data) {
-        console.debug('[App.jsx handleSubmit] Response data:', response.data);
-        setOriginalText(response.data.original_sentence);
-        setCorrectedText(response.data.corrected_sentence);
-        setMetadata({
-          modelName: response.data.model_name,
-          processingTimeMs: response.data.processing_time_ms,
-          correctionsMade: response.data.corrections_made,
-          message: response.data.message
-        });
-        console.log('[App.jsx handleSubmit] State updated with API response.');
-      } else {
-        console.error('[App.jsx handleSubmit] Received empty data in response.');
-        setError('Received an empty response from the server.');
-      }
+      const res = await axios.post(BACKEND_URL, {
+        sentence: inputText,
+        top_k: TOP_K
+      });
+      const d = res.data;
+      setOriginalText(d.original_sentence);
+      setCorrectedText(d.corrected_sentence);
+      setTokenDetails(d.token_details || []);
+      setMetadata({
+        modelName: d.model_name,
+        processingTimeMs: d.processing_time_ms,
+        correctionsMade: d.corrections_made,
+        message: d.message
+      });
     } catch (err) {
-      console.error('[App.jsx handleSubmit] API Error:', err);
-      let errorMessage = 'An error occurred while checking typos.';
-      if (err.response) {
-        // Server responded with a status code outside the 2xx range
-        console.error('[App.jsx handleSubmit] Error response data:', err.response.data);
-        console.error('[App.jsx handleSubmit] Error response status:', err.response.status);
-        errorMessage = err.response.data?.error || err.response.data?.message || `Server error: ${err.response.status}`;
-      } else if (err.request) {
-        // Request was made but no response received
-        console.error('[App.jsx handleSubmit] Error request:', err.request);
-        errorMessage = 'No response from server. Please check if the backend is running.';
-      } else {
-        // Something else happened in setting up the request
-        console.error('[App.jsx handleSubmit] Error message:', err.message);
-        errorMessage = `Error: ${err.message}`;
-      }
-      setError(errorMessage);
-    } finally {
-      console.debug('[App.jsx handleSubmit] Setting isLoading to false.');
-      setIsLoading(false);
-    }
+      setError(err.response?.data?.error || 'Server error'); }
+    finally { setIsLoading(false); }
   };
+
+  // helper to pretty-print top_probs dict
+  const renderProbs = (obj) =>
+    Object.entries(obj)
+      .map(([tag,p]) => `${tag}: ${(p*100).toFixed(1)}%`)
+      .join(' | ');
 
   return (
     <div className="app-container">
       <h1>Typo Detector AI</h1>
+
       <form onSubmit={handleSubmit}>
         <textarea
           value={inputText}
           onChange={handleInputChange}
-          placeholder="Enter a sentence with potential typos..."
-          rows="4"
+          placeholder="Enter a sentence with potential typos…"
+          rows={4}
           disabled={isLoading}
         />
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Checking...' : 'Check Typos'}
+          {isLoading ? 'Checking…' : 'Check Typos'}
         </button>
       </form>
 
-      {isLoading && <p className="loading-message">Loading results...</p>}
-      {error && <p className="error-message">Error: {error}</p>}
+      {isLoading && <p>Loading…</p>}
+      {error     && <p className="error-message">{error}</p>}
 
       {correctedText && (
         <div className="results-container">
-          <h3>Original Sentence:</h3>
-          <p>{originalText}</p>
-          <h3>Corrected Sentence:</h3>
-          <p>{correctedText}</p>
+          <h3>Original Sentence</h3><p>{originalText}</p>
+          <h3>Corrected Sentence</h3><p>{correctedText}</p>
+
+          {/* ---------- per-token table ---------- */}
+          {tokenDetails.length > 0 && (
+            <>
+              <h3>Token-level details (top {TOP_K})</h3>
+              <table className="token-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Token</th>
+                    <th>Predicted Tag</th>
+                    <th>Top Probabilities</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tokenDetails.map((t, idx) => (
+                    <tr key={idx}>
+                      <td>{idx+1}</td>
+                      <td>{t.token}</td>
+                      <td>{t.pred_tag}</td>
+                      <td>{renderProbs(t.top_probs)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
           {metadata && (
             <div className="metadata">
-              <p>
-                <strong>Corrections made:</strong> {metadata.correctionsMade ? 'Yes' : 'No'} <br />
-                <strong>Model:</strong> {metadata.modelName} <br />
-                <strong>Processing Time:</strong> {metadata.processingTimeMs} ms <br />
-                <strong>Server Message:</strong> {metadata.message}
-              </p>
+              <p><strong>Corrections:</strong> {metadata.correctionsMade ? 'Yes' : 'No'}</p>
+              <p><strong>Model:</strong> {metadata.modelName}</p>
+              <p><strong>Time:</strong> {metadata.processingTimeMs} ms</p>
+              <p><strong>Message:</strong> {metadata.message}</p>
             </div>
           )}
         </div>

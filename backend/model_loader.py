@@ -1,132 +1,129 @@
-# backend/model_loader.py (Version 1.1 with minor rejoin tweak)
-import os
-import re
-import time 
-from symspellpy import SymSpell, Verbosity
-import logging
+"""
+model_loader.py  –  now returns per-token tag + probability info
 
-# --- Configuration ---
-DICTIONARY_DIR = "." 
-DICTIONARY_FILENAME = "developer_symspell_dict_train_only.txt" # From Step 4
-SYMSPELL_DICTIONARY_PATH = os.path.join(DICTIONARY_DIR, DICTIONARY_FILENAME)
+Public API used by app.py
+-------------------------
+• load_model() -> bool
+• correct_text(sentence: str, top_k: int = 3)
+      returns (corrected_sentence, elapsed_ms, corrections_made, token_info)
+• symspell_model  (the loaded model object or None)
+• MODEL_NAME
+• SYMSPELL_DICTIONARY_PATH  (dummy for legacy log)
+"""
+from __future__ import annotations
+import json, logging, time
+from pathlib import Path
+from typing import Dict, List
 
-MODEL_NAME = "SymSpell_DevTypo_v1.1" # Updated model name
-MAX_EDIT_DISTANCE_LOOKUP = 2
-PREFIX_LENGTH = 7
+import torch
+import torch.nn.functional as F
+from transformers import AutoTokenizer
 
-logger = logging.getLogger("SymSpellModel") 
+from edit_tag_spellfix.model import RobertaTagger
+from edit_tag_spellfix.tags  import KEEP, DELETE, is_replace, strip_prefix
 
-# --- Text Preprocessing Functions (Using V2) ---
-def improved_tokenizer_v2(text):
-    if not isinstance(text, str): return []
-    text = text.lower()
-    # Ensure no empty strings are produced by findall if regex matches empty parts
-    tokens = [token for token in re.findall(r'\b[\w/:.#+-]+\b|%|[.,!?;()\'":]', text) if token]
-    return tokens
+# ------------------------------------------------------------------
+# Paths / constants
+# ------------------------------------------------------------------
+MODEL_DIR  = Path(__file__).parent / "models" / "roberta_tag_60k_v2"
+TAG_JSON   = MODEL_DIR / "tag2id.json"
+DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 
-def rejoin_tokens_v2(tokens):
-    if not tokens: return ""
-    
-    # Filter out any leading empty strings or None values from tokens list if they sneak in
-    # This helps prevent a leading space if the first "corrected" token was empty
-    processed_tokens = [token for token in tokens if token is not None and token != '']
-    if not processed_tokens: return ""
+MODEL_NAME = "edit-tag-roberta-60k-v2"
+SYMSPELL_DICTIONARY_PATH = "./dummy.txt"  # legacy
 
-    # Start with the first valid token directly
-    sentence = processed_tokens[0] 
-    for i in range(1, len(processed_tokens)):
-        token = processed_tokens[i]
-        # Add space before token unless it's specific punctuation.
-        if token in ['.', ',', '!', '?', ';', ':', ')', '\'', '"'] or \
-           (token == '%' and (processed_tokens[i-1].isdigit() or processed_tokens[i-1].endswith("d"))):
-            pass # No space for these cases
-        else:
-            sentence += " " # Add a space before other tokens
-        sentence += token
-    
-    # Correct space after opening parenthesis (if any are standalone tokens)
-    sentence = re.sub(r'([(])\s+', r'\1', sentence) 
-    return sentence.strip()
+# Globals
+symspell_model: RobertaTagger | None = None
+_tokenizer     = None
+_id2tag: Dict[int, str] | None = None
 
-# --- Global SymSpell Model Instance ---
-symspell_model = None
-
-def load_model():
-    """Loads the SymSpell model into the global symspell_model variable."""
-    global symspell_model
-    if symspell_model is not None:
-        logger.info("SymSpell model already loaded.")
-        return True
-
-    logger.info("Initializing SymSpell model for API.")
-    symspell_instance = SymSpell(max_dictionary_edit_distance=MAX_EDIT_DISTANCE_LOOKUP, prefix_length=PREFIX_LENGTH)
-    
-    if not os.path.exists(SYMSPELL_DICTIONARY_PATH):
-        logger.error(f"SymSpell dictionary file not found at {SYMSPELL_DICTIONARY_PATH}. Model cannot be loaded.")
-        return False
-
-    logger.info(f"Loading dictionary from {SYMSPELL_DICTIONARY_PATH} into SymSpell model.")
-    if symspell_instance.load_dictionary(SYMSPELL_DICTIONARY_PATH, term_index=0, count_index=1, encoding="utf-8"):
-        symspell_model = symspell_instance
-        logger.info("SymSpell model loaded successfully for API.")
-        return True
-    else:
-        logger.error("Failed to load SymSpell dictionary for API.")
-        return False
-
-def correct_text(sentence_to_correct):
-    """Corrects a sentence using the loaded SymSpell model."""
-    global symspell_model
-    if not symspell_model:
-        logger.error("SymSpell model not loaded. Cannot correct sentence.")
-        # Return original sentence and indicate no correction if model is not loaded
-        return sentence_to_correct, 0.0, False 
-
-    start_time = time.time()
-    
-    # Tokenize the input sentence (original, before any correction attempt)
-    original_lower_tokens = improved_tokenizer_v2(sentence_to_correct)
-    
-    # Perform correction
-    corrected_sentence_text = correct_sentence_symspell_internal(sentence_to_correct)
-    
-    processing_time_ms = (time.time() - start_time) * 1000
-
-    # Tokenize the corrected sentence to check if changes were made
-    corrected_lower_tokens = improved_tokenizer_v2(corrected_sentence_text)
-    
-    # Determine if corrections were made
-    corrections_were_made = original_lower_tokens != corrected_lower_tokens
-    
-    return corrected_sentence_text, processing_time_ms, corrections_were_made
-
-def correct_sentence_symspell_internal(sentence):
-    """Internal logic for SymSpell correction, assumes model is loaded."""
-    global symspell_model
-    
-    original_tokens = improved_tokenizer_v2(sentence) # Lowercases and tokenizes input
-    if not original_tokens: # Handle cases where tokenization results in empty list (e.g. empty or only whitespace input)
-        return ""
-        
-    corrected_tokens = []
-    keep_as_is_tokens = ['.', ',', '!', '?', ';', '(', ')', '\'', '"', ':', '%']
-
-    for token in original_tokens:
-        if token in keep_as_is_tokens:
-            corrected_tokens.append(token)
+# ------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------
+def _apply_tags(tokens: List[str], tags: List[str]) -> str:
+    out = []
+    for tok, tg in zip(tokens, tags):
+        if tg == KEEP:
+            out.append(tok)
+        elif tg == DELETE:
             continue
-        
-        suggestions = symspell_model.lookup(token, Verbosity.CLOSEST, 
-                                           MAX_EDIT_DISTANCE_LOOKUP, 
-                                           include_unknown=True, 
-                                           transfer_casing=False) 
-        if suggestions:
-            corrected_tokens.append(suggestions[0].term)
+        elif is_replace(tg):
+            out.append(strip_prefix(tg))
         else:
-            # This path should ideally not be taken frequently if include_unknown=True,
-            # as it should return the original token itself if no suggestion is found.
-            # If symspell.lookup returns an empty list (which is unusual for include_unknown=True),
-            # append the original token to avoid losing it.
-            corrected_tokens.append(token) 
-            
-    return rejoin_tokens_v2(corrected_tokens)
+            out.append(tok)
+    return " ".join(out)
+
+
+def _predict_verbose(sentence: str, top_k: int) -> tuple[str, List[dict]]:
+    """Return corrected sentence and per-token info."""
+    tokens = sentence.strip().split()
+    batch  = _tokenizer(tokens, is_split_into_words=True, return_tensors="pt")
+    word_ids = batch.word_ids(batch_index=0)
+    enc = {k: v.to(DEVICE) for k, v in batch.items()}
+
+    symspell_model.eval()
+    with torch.no_grad():
+        logits = symspell_model(**enc)["logits"]
+    probs = F.softmax(logits, dim=-1).squeeze(0)  # [seq_len, num_tags]
+    pred_ids = torch.argmax(probs, dim=-1).tolist()
+
+    results = []
+    tag_seq = []   # for sentence reconstruction
+    for idx, w_id in enumerate(word_ids):
+        if w_id is None:
+            continue
+        if idx == 0 or word_ids[idx-1] != w_id:   # first sub-token
+            tag_id   = pred_ids[idx]
+            tag_label = _id2tag[tag_id]
+            tag_seq.append(tag_label)
+
+            # top-k probs dict
+            tk = min(max(1, top_k), probs.shape[-1])
+            pk, pid = torch.topk(probs[idx], k=tk)
+            dist = { _id2tag[int(i)]: float(p) for i, p in zip(pid, pk) }
+
+            results.append({
+                "token": tokens[w_id],
+                "pred_tag": tag_label,
+                "top_probs": dist
+            })
+
+    corrected = _apply_tags(tokens, tag_seq)
+    return corrected, results
+
+# ------------------------------------------------------------------
+# Public functions
+# ------------------------------------------------------------------
+def load_model() -> bool:
+    global symspell_model, _tokenizer, _id2tag
+    if symspell_model is not None:
+        return True
+    try:
+        _tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, add_prefix_space=True)
+        _id2tag    = {v: k for k, v in json.load(open(TAG_JSON)).items()}
+        symspell_model = RobertaTagger.from_pretrained_with_tags(
+            str(MODEL_DIR), TAG_JSON, freeze_encoder=True
+        ).to(DEVICE)
+        _ = _predict_verbose("warm up", top_k=1)  # quick warm-up
+        return True
+    except Exception as e:
+        logging.getLogger(__name__).exception("Model load failed: %s", e)
+        symspell_model = None
+        return False
+
+
+def correct_text(sentence: str, top_k: int = 3):
+    """
+    Returns:
+        corrected_sentence (str)
+        processing_time_ms (float)
+        corrections_made   (bool)
+        token_info         (list[dict]) – one entry per original token
+    """
+    if symspell_model is None:
+        raise RuntimeError("Model not loaded")
+    start = time.perf_counter()
+    corrected, token_info = _predict_verbose(sentence, top_k)
+    elapsed = (time.perf_counter() - start) * 1_000
+    changed = corrected.strip() != sentence.strip()
+    return corrected, elapsed, changed, token_info

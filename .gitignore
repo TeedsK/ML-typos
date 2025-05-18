@@ -1,43 +1,71 @@
-# Node.js / React / Vite
+#######################################
+#  Node / Front-end                   #
+#######################################
+# dependency & build artifacts
 node_modules/
 dist/
-build/
-.vite/
-*.log
+dist-ssr/
+*.local
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.env
-.env.*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Python
+#######################################
+#  Python / Back-end                  #
+#######################################
+# virtualenvs
+.venv/
+env/
+venv/
+# Python cache / compiled
 __pycache__/
 *.py[cod]
-*.pyo
 *.pyd
-*.pyc
-*.pdb
-*.egg-info/
+*.so
 *.egg
-*.env
-.venv/
-venv/
-ENV/
-env/
-pip-log.txt
-pip-delete-this-directory.txt
+*.egg-info/
+# Jupyter
+.ipynb_checkpoints/
+# model artefacts (big, re-downloadable)
+backend/models/**/pytorch_model*.bin
+backend/models/**/model.safetensors
+backend/models/**/tf_model.h5
+# datasets & HF cache
+data/**/
+.cache/
+huggingface/
+~/.cache/huggingface/
+# training logs / checkpoints
+runs/
+wandb/
+*.ckpt
+*.pt
+# data
+data/**
+backend/data
+backend/models/**/pytorch_model*.bin
 
-# VS Code
-.vscode/
-.history/
+#######################################
+#  Logs & misc                         #
+#######################################
+logs/
+*.log
+data_loading_log.txt
 
-# OS
+#######################################
+#  OS / Editor cruft                   #
+#######################################
 .DS_Store
 Thumbs.db
-
-# Misc
-*.swp
-*.swo
+.vscode/
+!.vscode/extensions.json
 .idea/
-*.bak
-*.tmp
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
