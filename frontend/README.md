@@ -80,7 +80,7 @@ Success 200
     },
     ...
   ],
-  "model_name": "edit-tag-roberta-60k-v2",
+  "model_name": "edit-tag-roberta-82k-v2",
   "processing_time_ms": 12.8,
   "corrections_made": true,
   "message": "Typos checked successfully."

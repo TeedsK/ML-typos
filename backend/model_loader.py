@@ -25,11 +25,11 @@ from edit_tag_spellfix.tags  import KEEP, DELETE, is_replace, strip_prefix
 # ------------------------------------------------------------------
 # Paths / constants
 # ------------------------------------------------------------------
-MODEL_DIR  = Path(__file__).parent / "models" / "roberta_tag_60k_v2"
+MODEL_DIR  = Path(__file__).parent / "models" / "roberta_tag_82k_v2"
 TAG_JSON   = MODEL_DIR / "tag2id.json"
 DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 
-MODEL_NAME = "edit-tag-roberta-60k-v2"
+MODEL_NAME = "edit-tag-roberta-82k-v2"
 SYMSPELL_DICTIONARY_PATH = "./dummy.txt"  # legacy
 
 # Globals

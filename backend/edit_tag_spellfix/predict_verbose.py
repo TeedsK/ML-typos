@@ -5,7 +5,7 @@ Verbose inference: returns per-token tag plus tag-probability vector.
 Example
 -------
 python -m edit_tag_spellfix.predict_verbose \
-        --model_dir ".\\models\\roberta_tag_60k_v2" \
+        --model_dir ".\\models\\roberta_tag_82k_v2" \
         --sentence "a machine learning and fuil stack engineer huilding web tools and apps that deliver measurabie impacts" \
         --top_k 3
 """

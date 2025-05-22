@@ -6,13 +6,13 @@ Dataset preparation for edit-tag spell-correction.
 Usage (creates HF arrow cache + tag vocab JSON):
 
     python -m edit_tag_spellfix.data \
-        --csv  path/to/developer_typo_dataset_60k.csv \
-        --out  data/60k_roberta \
+        --csv  path/to/developer_typo_dataset_82k.csv \
+        --out  data/82k_roberta \
         --tokenizer roberta-base
 
 This will write
-   • data/60k_roberta/train.arrow  (and /validation.arrow if --split 0.x)
-   • data/60k_roberta/tag2id.json
+   • data/82k_roberta/train.arrow  (and /validation.arrow if --split 0.x)
+   • data/82k_roberta/tag2id.json
 """
 
 from __future__ import annotations

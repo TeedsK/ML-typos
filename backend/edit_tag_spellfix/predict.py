@@ -6,7 +6,7 @@ Examples
 --------
 # single sentence
 python -m edit_tag_spellfix.predict \
-        --model_dir ".\\models\\roberta_tag_60k_v2" \
+        --model_dir ".\\models\\roberta_tag_82k_v2" \
         --sentence "a machine learning and fuil stack engineer huilding web tools and apps that deliver measurabie impacts"
 """
 from __future__ import annotations

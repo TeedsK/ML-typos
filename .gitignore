@@ -31,7 +31,7 @@ __pycache__/
 .ipynb_checkpoints/
 # model artefacts (big, re-downloadable)
 backend/models/**/pytorch_model*.bin
-backend/models/**/model.safetensors
+# backend/models/**/model.safetensors
 backend/models/**/tf_model.h5
 # datasets & HF cache
 data/**/
@@ -46,7 +46,6 @@ wandb/
 # data
 data/**
 backend/data
-backend/models/**/pytorch_model*.bin
 
 #######################################
 #  Logs & misc                         #

@@ -4,8 +4,8 @@ Train the RoBERTa edit-tag model.
 
 Example:
     python -m edit_tag_spellfix.train \
-        --data_dir  data/60k_roberta \
-        --output_dir models/roberta_tag_60k \
+        --data_dir  data/82k_roberta \
+        --output_dir models/roberta_tag_82k \
         --epochs 3 \
         --batch_size 16 \
         --lr 2e-5
