@@ -49,7 +49,8 @@ class RobertaTagger(RobertaPreTrainedModel):
         freeze_encoder: bool = False,
         **kwargs,
     ):
-        tag2id = json.load(open(tag2id_path))
+        tag2id = json.load(open(tag2id_path, encoding="utf-8"))
+
         num_tags = len(tag2id)
 
         cfg = AutoConfig.from_pretrained(

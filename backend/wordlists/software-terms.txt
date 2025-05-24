@@ -1,0 +1,273 @@
+.NET 75
+.NET Core 75
+Agile 75
+AI/alias[AI|Artificial Intelligence] 150
+Airflow 75
+Android 75
+Ansible 75
+Angular 2/alias[Angular2|Angular 2] 75
+AngularJS/js[Angular] 75
+API 150
+Apollo 75
+App Engine/alias[App Engine|AppEngine|GAE] 75
+apps 2000000 
+AR/alias[AR|Augmented Reality] 75
+Assembly 75
+Asp 75
+ASP.NET 75
+ASP.NET MVC 75
+Aurora 75
+AWS 150
+Azure 150
+Back End/alias[Backend|Back-end] 75
+Backbone/js[Backbone] 75
+Bash 75
+Big Data/alias[BigData|Big Data] 75
+BigQuery 75
+Bitcoin 75
+Blazor 75
+Blockchain 75
+building 2000000 
+C 75
+C++ 75
+C# 75
+CakePHP 75
+Cassandra 75
+Celery 75
+ChatGPT 150
+Chef 75
+ClickHouse 75
+Clojure 75
+ClojureScript 75
+Cloud 75
+Cloudflare 75
+CloudFormation 75
+CloudFront 75
+COBOL 75
+CockroachDB 75
+CodeIgniter 75
+CoffeeScript 75
+Common Lisp 75
+Compass 75
+Computer Vision 75
+CouchDB 75
+CQRS 75
+Crystal 75
+CSS 75
+D3.js/js[D3] 75
+Dart 75
+Data Mining 75
+Data Science 75
+dbt 75
+Deep Learning 180
+deliver 1200000
+Delphi 75
+DevOps 150
+Distributed Systems 75
+Django 75
+Docker 150
+Drupal 75
+DynamoDB 75
+EC2 75
+Eclipse 75
+ECS 75
+EDI 75
+Elasticache 75
+Elasticsearch/alias[Elasticsearch|Elastic Search] 75
+Electron 75
+Elixir 75
+Elm 75
+Emacs 75
+Embedded Systems 75
+Ember/js[Ember] 75
+engineer 2000000 
+Erlang 75
+Ethereum 75
+ETL 75
+Express/js[Express] 75
+F# 75
+Fargate 75
+FastAPI 75
+Fastify 75
+Fintech 75
+Firebase 75
+Firecracker 75
+Flask 75
+Flutter 75
+Flux 75
+Front End/alias[Front-end|Frontend] 75
+full 2000000 
+Full Stack/alias[Full-Stack|Fullstack|Full Stack] 2000000
+Gatsby 75
+GCP 150
+Git 75
+GitHub 75
+GitLab 75
+golang 75
+GPT 150
+GPT-3 150
+GPT-4 150
+Grafana 75
+Graphite 75
+GraphQL 75
+Groovy 75
+gRPC 75
+Hadoop 75
+haproxy 75
+Haskell 75
+HaXe 75
+Heroku 75
+Hotwire 75
+Hybrid 75
+impact 2000000
+InfluxDB 75
+iOS 75
+Java 75
+JavaScript 75
+jenkins 75
+jQuery 75
+JSON API 75
+JSP 75
+Julia 75
+Junior 75
+JUnit 75
+Jupyter 75
+Kafka 75
+Keras 75
+Kinesis 75
+Knockout/js[Knockout] 75
+Kotlin 75
+Kubernetes 150
+Lambda 75
+LAMP 75
+Laravel 75
+learning 200
+linux 75
+Lisp 75
+Lua 75
+Lucene 75
+Machine Learning/alias[ML|learning] 3000000 
+Mahout 75
+MapReduce 75
+MariaDB 75
+MATLAB 75
+Maven 75
+measurable 2000000 
+memcached/alias[memcached|memcache] 75
+Mesos 75
+Metabase 75
+Meteor 75
+Microservices/alias[Microservices|Microservices|Micro Services] 75
+machine 2000000
+Mongodb/alias[mongo|mongodb] 75
+MySQL 75
+neo4j 75
+NestJS/alias[Nest.JS] 75
+Next.js/alias[NextJS] 75
+nginx 75
+NLP 75
+node.js/js[node] 75
+Nomad 75
+NumPy 75
+Nuxt 75
+Objective-C/alias[Objective-C|ObjectiveC|Objective C] 75
+Observability 75
+OCaml 75
+Onsite/alias[Onsite|On-site] 75
+Open Source/alias[Open Source|open-source] 75
+OpenAI 150
+OpenCV 75
+OpenGL 75
+OpenStack 75
+Oracle 75
+Pandas 75
+Perl 75
+PhantomJS/js[phantom] 75
+Phoenix 75
+PHP 75
+Pig 75
+Postgresql/alias[postgres|postgresql] 75
+Principal 75
+Processing 75
+Prolog 75
+Prometheus 75
+Protocol Buffers/alias[Protocol Buffers|Protocol Buffer|protobuf] 75
+Pulumi 75
+Puppet 75
+Python 150
+PyTorch 150
+R 75
+RabbitMQ 75
+Rails 75
+RDS 75
+React/js[react] 75
+React Native 75
+Redis 75
+Redshift 75
+Redux 75
+Remote 75
+REST 75
+Riak 75
+Robotics 75
+Ruby 75
+Rust 75
+Sass 75
+S3 75
+Scala 75
+Scheme 75
+Scrum 75
+Security 75
+Selenium 75
+Senior 75
+Shell 75
+Sidekiq 75
+Snowflake 75
+SNS 75
+Solr 75
+Spark 75
+Spinnaker 75
+Spring 75
+SQL 75
+SQL Server 75
+SQS 75
+stack 1500000 
+Staff 75
+statistics 75
+Storm 75
+Struts 75
+Supabase 75
+Svelte 75
+SvelteKit 75
+Swift 75
+Symfony 75
+Tailwind 75
+TensorFlow 150
+Terraform 75
+TDD 75
+TimescaleDB 75
+tools 2000000
+Transformers 150
+Turbo 75
+TypeScript 75
+Unreal Engine 75
+Vagrant 75
+Varnish 75
+Vi/alias[Vi|Vim] 75
+Visual Basic 75
+Vue/js[vue] 75
+VR/alias[VR|Virtual Reality] 75
+web 75
+web3 75
+WebAssembly/alias[WASM|Wasm] 75
+WebGL 75
+Webpack 75
+WebRTC 75
+WebSockets 75
+WordPress 75
+WPF 75
+Xamarin 75
+XML 75
+xR 75
+ZeroMQ/alias[ZeroMQ|0MQ] 75
+Zig 75
+zookeeper 75

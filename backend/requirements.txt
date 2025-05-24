@@ -11,3 +11,4 @@ python-dotenv==1.0.0
 accelerate>=0.28.0
 sentencepiece>=0.1.99
 textdistance>=4.6.0
+langdetect

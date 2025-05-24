@@ -1,5 +1,5 @@
 {
-  "_name_or_path": ".\\models\\roberta_tag_60k",
+  "_name_or_path": ".\\models\\roberta_tag_82k",
   "architectures": [
     "RobertaTagger"
   ],

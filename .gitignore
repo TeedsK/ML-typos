@@ -46,6 +46,7 @@ wandb/
 # data
 data/**
 backend/data
+backend/models
 
 #######################################
 #  Logs & misc                         #
